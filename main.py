@@ -25,8 +25,11 @@ app.layout = html.Div([
     dcc.Graph(id='air-quality-graph'),
     html.Div([
         dcc.Graph(id='example-scatter-plot')
-    ], className="six columns")
-])
+    ], className="six columns"),
+    html.Div([
+            dcc.Graph(id='pie-chart')
+        ], className="six columns")
+    ], className="row")
 
 @app.callback(
     Output('example-scatter-plot', 'figure'),
@@ -52,7 +55,7 @@ def update_scatter_plot(selected_pollutant):
         fig.update_layout(layout)
     else:
         fig = px.scatter(df, x='DATETIMEDATA', y=selected_pollutant,
-                         template="plotly_dark", title=f'{selected_pollutant} over Time')
+                         template="plotly_dark", title=selected_pollutant)
     return fig
 
 @app.callback(
@@ -97,6 +100,27 @@ def update_graph(selected_pollutant):
         )
         
         return {'data': [trace], 'layout': layout}
+
+@app.callback(
+    Output('pie-chart', 'figure'),
+    Input('dropdown', 'value')
+)
+def update_pie_chart(selected_pollutant):
+    if selected_pollutant == 'all':
+        fig = go.Figure(data=[go.Pie(labels=pollutants, values=[df[pollutant].sum() for pollutant in pollutants], hole=0.7)])
+        layout = go.Layout(
+            title='Total Concentration by Pollutant',
+            template="plotly_dark"
+        )
+        fig.update_layout(layout)
+    else:
+        fig = go.Figure(data=[go.Pie(labels=[selected_pollutant], values=[df[selected_pollutant].sum()], hole=0.7)])
+        layout = go.Layout(
+            title=f'Total Concentration of {selected_pollutant}',
+            template="plotly_dark"
+        )
+        fig.update_layout(layout)
+    return fig
 
 
 if __name__ == "__main__":
