@@ -1,9 +1,11 @@
-from dash import Dash,html,dash_table
+import dash
+from dash import html,dash_table
 import pandas as pd
+import dash_bootstrap_components as dbc
 
-app = Dash(__name__)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.VAPOR])
 
-df = pd.read_csv('data/air4thai_44t_2024-01-01_2024-03-01.csv')
+df = pd.read_csv('data/PM25.csv')
 
 app.layout = html.Div([
     html.Div(children='First Deployed Dash App'),
