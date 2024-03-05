@@ -22,8 +22,38 @@ app.layout = html.Div([
         options=columns,
         value='PM25'
     ),
-    dcc.Graph(id='air-quality-graph')
+    dcc.Graph(id='air-quality-graph'),
+    html.Div([
+        dcc.Graph(id='example-scatter-plot')
+    ], className="six columns")
 ])
+
+@app.callback(
+    Output('example-scatter-plot', 'figure'),
+    Input('dropdown', 'value')
+)
+def update_scatter_plot(selected_pollutant):
+    if selected_pollutant == 'all':
+        fig = go.Figure()
+        for pollutant in pollutants:
+            fig.add_trace(go.Scatter(
+                x=df['DATETIMEDATA'],
+                y=df[pollutant],
+                mode='markers',
+                name=pollutant
+            ))
+        layout = go.Layout(
+            title='Air Quality Scatter Plot',
+            xaxis=dict(title='Date'),
+            yaxis=dict(title='Concentration'),
+            hovermode='closest',
+            template="plotly_dark"
+        )
+        fig.update_layout(layout)
+    else:
+        fig = px.scatter(df, x='DATETIMEDATA', y=selected_pollutant,
+                         template="plotly_dark", title=f'{selected_pollutant} over Time')
+    return fig
 
 @app.callback(
     Output('air-quality-graph', 'figure'),
@@ -45,7 +75,8 @@ def update_graph(selected_pollutant):
             title='Air Quality',
             xaxis=dict(title='Date'),
             yaxis=dict(title='Concentration'),
-            hovermode='closest'
+            hovermode='closest',
+            template="plotly_dark"
         )
         
         return {'data': traces, 'layout': layout}
@@ -61,7 +92,8 @@ def update_graph(selected_pollutant):
             title='Air Quality',
             xaxis=dict(title='Date'),
             yaxis=dict(title='Concentration'),
-            hovermode='closest'
+            hovermode='closest',
+            template="plotly_dark"
         )
         
         return {'data': [trace], 'layout': layout}
