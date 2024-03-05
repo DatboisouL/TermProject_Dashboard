@@ -20,9 +20,52 @@ app.layout = html.Div([
     dcc.Dropdown(
         id='dropdown',
         options=columns,
-        value='PM25'  # Default value
-    )
+        value='PM25'
+    ),
+    dcc.Graph(id='air-quality-graph')
 ])
+
+@app.callback(
+    Output('air-quality-graph', 'figure'),
+    [Input('dropdown', 'value')]
+)
+def update_graph(selected_pollutant):
+    if selected_pollutant == 'all':
+        traces = []
+        for pollutant in pollutants:
+            trace = go.Scatter(
+                x=df['DATETIMEDATA'],
+                y=df[pollutant],
+                mode='lines',
+                name=pollutant
+            )
+            traces.append(trace)
+        
+        layout = go.Layout(
+            title='Air Quality',
+            xaxis=dict(title='Date'),
+            yaxis=dict(title='Concentration'),
+            hovermode='closest'
+        )
+        
+        return {'data': traces, 'layout': layout}
+    else:
+        trace = go.Scatter(
+            x=df['DATETIMEDATA'],
+            y=df[selected_pollutant],
+            mode='lines',
+            name=selected_pollutant
+        )
+        
+        layout = go.Layout(
+            title='Air Quality',
+            xaxis=dict(title='Date'),
+            yaxis=dict(title='Concentration'),
+            hovermode='closest'
+        )
+        
+        return {'data': [trace], 'layout': layout}
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
