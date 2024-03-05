@@ -27,9 +27,12 @@ app.layout = html.Div([
         dcc.Graph(id='example-scatter-plot')
     ], className="six columns"),
     html.Div([
-            dcc.Graph(id='pie-chart')
-        ], className="six columns")
-    ], className="row")
+        dcc.Graph(id='pie-chart')
+    ], className="six columns"),
+    html.Div([
+        dcc.Graph(id='bar-chart')
+    ])
+], className="row")
 
 @app.callback(
     Output('example-scatter-plot', 'figure'),
@@ -122,6 +125,30 @@ def update_pie_chart(selected_pollutant):
         fig.update_layout(layout)
     return fig
 
+@app.callback(
+    Output('bar-chart', 'figure'),
+    Input('dropdown', 'value')
+)
+def update_bar_chart(selected_pollutant):
+    if selected_pollutant == 'all':
+        fig = go.Figure(data=[go.Bar(x=pollutants, y=[df[pollutant].sum() for pollutant in pollutants])])
+        layout = go.Layout(
+            title='Total Concentration by Pollutant (Bar Chart)',
+            xaxis=dict(title='Pollutant'),
+            yaxis=dict(title='Total Concentration'),
+            template="plotly_dark"
+        )
+        fig.update_layout(layout)
+    else:
+        fig = go.Figure(data=[go.Bar(x=[selected_pollutant], y=[df[selected_pollutant].sum()])])
+        layout = go.Layout(
+            title=f'Total Concentration of {selected_pollutant} (Bar Chart)',
+            xaxis=dict(title='Pollutant'),
+            yaxis=dict(title='Total Concentration'),
+            template="plotly_dark"
+        )
+        fig.update_layout(layout)
+    return fig
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True,port=6969)
