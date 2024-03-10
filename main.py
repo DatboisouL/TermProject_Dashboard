@@ -11,7 +11,7 @@ app.title = "Air Quality"
 
 df = pd.read_csv('data/PM25.csv')
 
-pollutants = ['PM25', 'PM10', 'O3', 'NO2', 'SO2', 'CO', 'WS', 'TEMP', 'RH', 'WD']
+pollutants = ['PM25', 'O3', 'WS', 'TEMP', 'RH', 'WD']
 columns = [{'label': col, 'value': col} for col in df.columns if col in pollutants]
 columns.append({'label': 'All Pollutants', 'value': 'all'})
 
