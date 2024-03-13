@@ -43,7 +43,7 @@ app.layout = dbc.Container(fluid=True, style={'backgroundColor': '#f0f0f0'}, chi
                 ),
                 dbc.Col(
                     html.Div([
-                        html.Div("Date",style={'margin': 'auto'}),
+                        html.Div("Date", style={'margin': 'auto'}),
                         dcc.DatePickerRange(
                             id='date-picker-range',
                             min_date_allowed=pd.to_datetime('2024-01-01'),
@@ -59,16 +59,45 @@ app.layout = dbc.Container(fluid=True, style={'backgroundColor': '#f0f0f0'}, chi
             ])
         ])
     ]),
-    dash_table.DataTable(data=df.to_dict('records'), page_size=10, style_cell={'textAlign': 'center'},style_as_list_view=True,),
+    dash_table.DataTable(data=df.to_dict('records'), page_size=10, style_cell={'textAlign': 'center'}, style_as_list_view=True,),
     dbc.Row([
-        dbc.Col(dcc.Graph(id='air-quality-graph'),width=6),
-        dbc.Col(dcc.Graph(id='example-scatter-plot'),width=6)
+        dbc.Col(dcc.Graph(id='air-quality-graph'), width=6),
+        dbc.Col(dcc.Graph(id='example-scatter-plot'), width=6)
     ], style={'margin-bottom': '20px'}),
     dbc.Row([
-        dbc.Col(dcc.Graph(id='bar-chart'),width=6),
-        dbc.Col(dcc.Graph(id='pie-chart'),width=6)
+        dbc.Col(dcc.Graph(id='bar-chart'), width=6),
+        dbc.Col(dcc.Graph(id='pie-chart'), width=6)
     ], style={'margin-bottom': '20px'}),
+    dbc.Row([
+        dbc.Col(html.H1("PM2.5 AND O3 PREDICTION 🔮", style={'text-align': 'center'}))
+    ]),
+    dbc.Row([
+    dbc.Col([
+        dbc.Card([
+            dbc.CardBody([
+                html.Div([
+                    html.Div("Prediction Date", style={'text-align': 'center'}),
+                    dcc.DatePickerRange(
+                        id='prediction-date-picker-range',
+                        min_date_allowed=pd.to_datetime('2024-03-02'),
+                        max_date_allowed=pd.to_datetime('2024-04-01'),
+                        initial_visible_month=pd.to_datetime('2024-03-02'),
+                        start_date=pd.to_datetime('2024-03-02'),
+                        end_date=pd.to_datetime('2024-04-01'),
+                        className="mr-3",
+                        style={'text-align': 'center'}
+                    ),
+                ])
+            ])
+        ])
+    ], width=12)
+]),
+    dbc.Row([
+        dbc.Col(dcc.Graph(id='o3-prediction-graph'), width=6),
+        dbc.Col(dcc.Graph(id='pm25-prediction-graph'), width=6)
+    ], style={'margin-bottom': '20px'})
 ])
+
 @app.callback(
     Output('example-scatter-plot', 'figure'),
     [Input('dropdown', 'value'),
@@ -217,6 +246,47 @@ def update_bar_chart(selected_pollutant, start_date, end_date):
             template="plotly_dark"
         )
         fig.update_layout(layout)
+    return fig
+
+@app.callback(
+    Output('pm25-prediction-graph', 'figure'),
+    [Input('dropdown', 'value'),
+    Input('prediction-date-picker-range', 'start_date'),
+    Input('prediction-date-picker-range', 'end_date')]
+)
+def update_pm25_prediction(start_date, end_date):
+    prediction_df = pd.read_csv('data/predict_PM25.csv')
+    
+    filtered_prediction_df = prediction_df[(prediction_df['DATETIMEDATA'] >= start_date) & (prediction_df['DATETIMEDATA'] <= end_date)]
+    
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatter(x=filtered_prediction_df['DATETIMEDATA'], y=filtered_prediction_df['prediction_label'],
+                             mode='lines', name='Predicted PM25'))
+    
+    fig.update_layout(title='Predicted PM25 Concentration', xaxis_title='DATETIMEDATA', yaxis_title='PM25 Concentration',
+            template="plotly_dark")
+    
+    return fig
+
+@app.callback(
+    Output('o3-prediction-graph', 'figure'),
+    [Input('prediction-date-picker-range', 'start_date'),
+    Input('prediction-date-picker-range', 'end_date')]
+)
+def update_o3_prediction(start_date, end_date):
+    prediction_df = pd.read_csv('data/predict_O3.csv')
+    
+    filtered_prediction_df = prediction_df[(prediction_df['DATETIMEDATA'] >= start_date) & (prediction_df['DATETIMEDATA'] <= end_date)]
+    
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatter(x=filtered_prediction_df['DATETIMEDATA'], y=filtered_prediction_df['prediction_label'],
+                             mode='lines', name='Predicted O3'))
+    
+    fig.update_layout(title='Predicted O3 Concentrations', xaxis_title='DATETIMEDATA', yaxis_title='O3 Concentration',
+            template="plotly_dark")
+    
     return fig
 
 if __name__ == "__main__":
