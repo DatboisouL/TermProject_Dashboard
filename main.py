@@ -254,7 +254,7 @@ def update_bar_chart(selected_pollutant, start_date, end_date):
     Input('prediction-date-picker-range', 'start_date'),
     Input('prediction-date-picker-range', 'end_date')]
 )
-def update_pm25_prediction(start_date, end_date):
+def update_pm25_prediction(selected_pollutant, start_date, end_date):
     prediction_df = pd.read_csv('data/predict_PM25.csv')
     
     filtered_prediction_df = prediction_df[(prediction_df['DATETIMEDATA'] >= start_date) & (prediction_df['DATETIMEDATA'] <= end_date)]
